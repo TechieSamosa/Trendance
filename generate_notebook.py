@@ -1,4 +1,6 @@
-{
+import json
+
+notebook = {
  "cells": [
   {
    "cell_type": "markdown",
@@ -11,7 +13,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -41,7 +43,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -89,7 +91,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -151,7 +153,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -202,13 +204,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
     "def train_model(lambda_val, epochs=20):\n",
     "    print(f\"\\n{'='*50}\")\n",
-    "    print(f\"Training with \u03bb = {lambda_val}\")\n",
+    "    print(f\"Training with λ = {lambda_val}\")\n",
     "    print(f\"{'='*50}\")\n",
     "    \n",
     "    # Data prep\n",
@@ -292,7 +294,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -317,7 +319,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -337,7 +339,7 @@
     "\n",
     "plt.plot(final_sparsities, final_accs, 'mo-', markersize=8, linewidth=2)\n",
     "for i, l in enumerate(lambdas):\n",
-    "    plt.annotate(f\"\u03bb={l}\", (final_sparsities[i], final_accs[i]), textcoords=\"offset points\", xytext=(0,10), ha='center')\n",
+    "    plt.annotate(f\"λ={l}\", (final_sparsities[i], final_accs[i]), textcoords=\"offset points\", xytext=(0,10), ha='center')\n",
     "plt.title('Sparsity vs Test Accuracy Trade-off')\n",
     "plt.xlabel('Sparsity Level (%)')\n",
     "plt.ylabel('Test Accuracy (%)')\n",
@@ -349,7 +351,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -363,7 +365,7 @@
     "\n",
     "plt.figure(figsize=(10, 6))\n",
     "plt.hist(all_gates, bins=50, color='teal', edgecolor='black', alpha=0.7)\n",
-    "plt.title(f'Distribution of Final Gate Values (\u03bb = {best_lambda})')\n",
+    "plt.title(f'Distribution of Final Gate Values (λ = {best_lambda})')\n",
     "plt.xlabel('Gate Value (after Sigmoid)')\n",
     "plt.ylabel('Frequency')\n",
     "plt.yscale('log') # Log scale is better to see both the huge spike at 0 and the rest\n",
@@ -375,7 +377,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -383,8 +385,8 @@
     "fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))\n",
     "\n",
     "for l_val in lambdas:\n",
-    "    ax1.plot(results[l_val]['test_acc'], label=f'\u03bb={l_val}')\n",
-    "    ax2.plot(results[l_val]['sparsity'], label=f'\u03bb={l_val}')\n",
+    "    ax1.plot(results[l_val]['test_acc'], label=f'λ={l_val}')\n",
+    "    ax2.plot(results[l_val]['sparsity'], label=f'λ={l_val}')\n",
     "\n",
     "ax1.set_title('Test Accuracy over Epochs')\n",
     "ax1.set_xlabel('Epoch')\n",
@@ -426,3 +428,6 @@
  "nbformat": 4,
  "nbformat_minor": 4
 }
+
+with open("d:\\Projects and Coding\\Version Control Systems\\Trendance\\self_pruning_nn.ipynb", "w") as f:
+    json.dump(notebook, f, indent=1)
