@@ -191,6 +191,6 @@ See [`report.md`](./report.md) for the full derivation, gradient analysis, and c
 
 ## Author
 
-**[Your Name]**  
+**Aditya Sachin Khamitkar**  
 GitHub: [TechieSamosa](https://github.com/TechieSamosa)  
 Submission for: Tredence Analytics AI Engineering Internship 2025
