@@ -1,43 +1,94 @@
-# The Self-Pruning Neural Network 🧠✂️
-
-**Tredence Analytics — AI Agents Engineering Internship 2025 Submission**
-
-This repository contains the solution for the "Self-Pruning Neural Network" challenge. The goal of this project is to design and implement a neural network that dynamically learns to prune its own unnecessary weights *during* the training process, rather than as a post-training compression step.
-
-## 🌟 Key Features
-
-- **Custom `PrunableLinear` Layer:** A PyTorch `nn.Module` implementation where every weight is multiplied by a learnable gate ($\in (0,1)$).
-- **Self-Balancing Sparsity Loss:** Utilizes an L1 penalty on the sigmoid gates. We specifically utilize the **sum** of the gates to ensure the mathematical gradient at the per-parameter level provides a strong, uniform downward pruning pressure.
-- **Dynamic Routing:** As the gates approach $0$, the corresponding weights are effectively "pruned" on the fly.
-- **Comprehensive Evaluation:** Evaluated on the CIFAR-10 dataset with a full analysis of the trade-off between the sparsity penalty ($\lambda$) and test accuracy.
-
-## 📁 Repository Structure
-
-- `self_pruning_nn.ipynb`: The primary, self-contained Jupyter Notebook. Contains the complete implementation of the Prunable layer, the CNN architecture, the exact sparsity loss, the training loop, and all visualization code. *(Optimized for execution in Kaggle / Google Colab).*
-- `Report.md`: A detailed Markdown report explaining the mathematical foundation of the L1 penalty, analyzing the critical difference between `.sum()` and `.mean()` on the parameter gradients, and presenting the final accuracy-vs-sparsity results.
-- `generate_notebook.py`: A Python script that programmatically generated the final IPYNB structure.
-- `self_pruning_network.py`: A standalone Python script version of the codebase.
-
-## 🚀 How to Run
-
-1. **Open in Kaggle or Colab:**
-   Upload `self_pruning_nn.ipynb` to a Kaggle Notebook or Google Colab environment.
-2. **Select Accelerator:**
-   *Important:* Ensure your hardware accelerator is set to a modern GPU (e.g., **GPU T4 x2** in Kaggle). Older GPUs like the P100 (`sm_60`) have been deprecated by recent PyTorch builds and will throw a `CUDA error: no kernel image is available`.
-3. **Run All Cells:**
-   The notebook will automatically download the CIFAR-10 dataset, train the network across three different $\lambda$ configurations (`0.0`, `0.01`, `0.05`), and generate the final plots.
-
-## 📊 Results Summary
-
-The L1 penalty successfully induces a bimodal gate distribution, allowing the network to aggressively drop parameters while maintaining competitive accuracy:
-
-| Lambda ($\lambda$) | Test Accuracy | Sparsity Level |
-|:---|:---:|:---:|
-| **0.00** | ~85.5% | 0.00% |
-| **0.01** | ~84.0% | ~40.0% |
-| **0.05** | ~79.0% | ~85.0% |
-
-For a deeper dive into the gradient mechanics and visual heatmaps, see [Report.md](./Report.md).
+# Self-Pruning Neural Network 🧠✂️
+**Dynamic Sparsification with Learnable Gates (PyTorch)**
 
 ---
-*Built with PyTorch. Designed for the Tredence Studio AI Engineering Cohort.*
+
+## Overview
+
+This repository implements a **self-pruning neural network** that learns to remove redundant connections *during* training, rather than relying on post-training pruning.
+
+Each weight is associated with a learnable **gate** that determines its importance. Through L1 regularization on these gates, the model suppresses unnecessary weights and learns a sparse, efficient representation.
+
+## Key Idea
+
+Each weight $w$ is modulated by a learnable gate:
+
+$$w' = w \times \sigma(g)$$
+
+- $\sigma(g) \in (0,1)$ acts as a soft mask
+- Small gate values → weight effectively **pruned**
+- Large gate values → weight **retained**
+
+## Architecture
+
+- Custom `PrunableLinear` layer (no use of `nn.Linear`)
+- **3-layer MLP:** Input (3072) → 512 → 256 → 10
+- **Dataset:** CIFAR-10
+
+## Loss Function
+
+$$L = L_{CE} + \lambda \cdot \sum \sigma(g)$$
+
+- $L_{CE}$: Cross-entropy loss
+- $\lambda$: Sparsity regularization coefficient
+- L1 penalty on gates encourages sparsity
+
+## Results
+
+### Performance vs Sparsity
+
+| Lambda | Test Accuracy (%) | Sparsity (%) |
+|:---:|:---:|:---:|
+| 1e-05 | 54.29 | 99.04 |
+| 1e-04 | 47.37 | 99.83 |
+| 5e-04 | 41.10 | 99.93 |
+| 1e-03 | 33.43 | 99.97 |
+| 2e-03 | 10.00 | 100.00 |
+
+### Key Insights
+
+1. **Sparsity Increases with Lambda** — Even at the smallest $\lambda = 10^{-5}$, the network prunes 99% of its connections while retaining 54% accuracy. The self-pruning mechanism is highly effective.
+
+2. **Over-Pruning Hurts Performance** — As $\lambda$ increases, the network prunes more aggressively. At $\lambda = 2 \times 10^{-3}$, 100% sparsity is reached and the model collapses to random guessing (10% on 10 classes).
+
+3. **The Sweet Spot** — $\lambda = 10^{-5}$ offers the best trade-off, maintaining reasonable accuracy while achieving extreme compression (~99% parameter reduction).
+
+4. **Training Dynamics** — Sparsity follows a sigmoidal growth pattern:
+   - **Early phase:** Minimal pruning, feature learning
+   - **Mid phase:** Rapid pruning of redundant connections
+   - **Late phase:** Saturation and stable sparse structure
+
+## Visualizations
+
+All plots are generated by the notebook and saved in `output/`:
+
+| File | Description |
+|---|---|
+| `training_curves.png` | Accuracy & sparsity over epochs for all λ |
+| `sparsity_vs_accuracy.png` | Trade-off scatter plot |
+| `gate_distributions.png` | Gate value histograms for all λ |
+| `plot_lambda_*.png` | Per-λ detailed plots (histogram + training curves) |
+
+## Repository Structure
+
+```
+├── self_pruning_nn.ipynb   # Complete notebook (run on Kaggle with GPU)
+├── Report.md               # Detailed experiment report
+├── README.md               # This file
+├── output/                 # Generated plots
+│   ├── training_curves.png
+│   ├── sparsity_vs_accuracy.png
+│   ├── gate_distributions.png
+│   └── plot_lambda_*.png
+└── .gitignore
+```
+
+## How to Run
+
+1. Upload `self_pruning_nn.ipynb` to **Kaggle** or **Google Colab**
+2. Select a **GPU accelerator** (T4 recommended)
+3. Run all cells — the notebook downloads CIFAR-10, trains across 5 λ values, and generates all plots
+
+---
+
+*Built with PyTorch for the Tredence Studio AI Engineering Internship 2025.*

@@ -1,0 +1,15 @@
+# Data files (CIFAR-10 downloads, model checkpoints)
+Data/
+data/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Scratch/build scripts (not needed in repo)
+generate_notebook.py
+test_pruning.py
+self_pruning_network.py
+
+# PDF version of README (redundant)
+README.pdf
